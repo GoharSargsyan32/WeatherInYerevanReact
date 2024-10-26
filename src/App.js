@@ -1,24 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ForecastList from './components/ForecastList';
+import HourlyForecast from './components/HourlyForecast';
+import "./App.css";
+
+const API_KEY = 'fd48bdf8a8b87b3c140f17625f4e2d57';
+const CITY = 'Yerevan';
 
 function App() {
+  const [forecastData, setForecastData] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${CITY}&units=metric&appid=${API_KEY}`);
+        console.log(response.data);
+        setForecastData(response.data.list);
+      } catch (err) {
+        setError('Error');
+      }
+    };
+    fetchWeather();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <h1>Weather In Yerevan For 5 Days</h1>
+        {error && <p>{error}</p>}
+        <Routes>
+          <Route path="/" element={<ForecastList forecastData={forecastData} />} />
+          <Route path="/day/:day" element={<HourlyForecast forecastData={forecastData} />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
